@@ -15,7 +15,7 @@ local_image_folder_path = arcpy.GetParameterAsText(4)
 starttime = time.time()
 try:
     gis = GIS(url=portal_url, username=portal_username, password=portal_password)
-    me = gis.users.me
+    gis_user = gis.users.me
 except Exception:
     e = sys.exc_info()[1]
     print(e.args[0])
@@ -25,7 +25,8 @@ endtime = time.time()
 arcpy.AddMessage("Logging in took: {} seconds".format(round(endtime - starttime,2)))
 
 
-
+gis_user_folders = gis_user.folders
+gis_user_folderTitles = [f.get("title") for f in gis_user_folders]
 
 
 #Read Exif if no issues upload images
@@ -46,10 +47,7 @@ image_collection_name = "imagery_" + prj_name + EXIF_DateTime
 
 
 arcpy.SetProgressorLabel("Initializing folder...")
-if prj_name not in me.folders:
-    prj_folder_item = gis.content.create_folder(folder=prj_name, owner=portal_username)
-
-
+prj_folder_item = gis.content.create_folder(folder=prj_name, owner=portal_username)
 
 
 image_item_list = []
