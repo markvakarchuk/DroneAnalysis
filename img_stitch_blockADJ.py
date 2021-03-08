@@ -122,9 +122,19 @@ from arcgis.raster.orthomapping import *
 
 
 starttime = time.time()
-compute_sensor_model(image_collection=image_collection_item, mode='Full', location_accuracy='High')
+compute_sensor_model(image_collection=image_collection_item, mode='Quick', location_accuracy='Low')
 endtime = time.time()
-arcpy.AddMessage("Computing Sensor Model took: {} seconds".format(round(endtime - starttime,2)))
+arcpy.AddMessage("Computing Preliminary Sensor Model took: {} seconds".format(round(endtime - starttime,2)))
+
+starttime = time.time()
+compute_control_points(image_collection=image_collection_item,
+                        reference_image="https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+                        image_location_accuracy='High')
+endtime = time.time()
+arcpy.AddMessage("Computing Control Points took: {} seconds".format(round(endtime - starttime,2)))
+
+
+
 arcpy.SetProgressorPosition(total_num_steps * 2)
 modelbuilder_ortho = image_collection_item.layers[0].export_image(size=[1200,450], f='image', save_folder='.', save_file= prj_name + '_ortho.jpg')
 arcpy.SetProgressorPosition(total_num_steps * 3)
