@@ -7,13 +7,15 @@ portal_password = "&$89t0RQxNlp"
 gis = GIS(url=portal_url, username=portal_username, password=portal_password)
 me = gis.users.me
 
-print(me.folders)
+print(me)
 
 mefolders = me.folders
 
 foldertitles = []
 for f in mefolders:
     foldertitles.append(f.get("title"))
+
+print(foldertitles)
 
 # try:
 #     gis = GIS(url=portal_url, username=portal_username, password=portal_password)
