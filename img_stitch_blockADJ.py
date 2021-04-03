@@ -134,7 +134,7 @@ endtime = time.time()
 arcpy.AddMessage("Computing Control Points took: {} seconds".format(round(endtime - starttime,2)))
 
 
-
 arcpy.SetProgressorPosition(total_num_steps * 2)
 modelbuilder_ortho = image_collection_item.layers[0].export_image(size=[1200,450], f='image', save_folder='.', save_file= prj_name + '_ortho.jpg')
 arcpy.SetProgressorPosition(total_num_steps * 3)
+

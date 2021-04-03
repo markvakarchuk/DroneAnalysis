@@ -122,7 +122,7 @@ from arcgis.raster.orthomapping import *
 
 
 starttime = time.time()
-compute_sensor_model(image_collection=image_collection_item, mode='Full', location_accuracy='High')
+compute_sensor_model(image_collection=image_collection_item, mode='Quick', location_accuracy='Low')
 endtime = time.time()
 arcpy.AddMessage("Computing Sensor Model took: {} seconds".format(round(endtime - starttime,2)))
 arcpy.SetProgressorPosition(total_num_steps * 2)
