@@ -57,7 +57,9 @@ prj_folder_item = gis.content.create_folder(folder=prj_name, owner=portal_userna
 image_item_list = []
 item_prop_template = {"type": "Image"}
 
-total_num_steps = len(image_list) * 3
+total_num_steps = len(image_list) * 8
+
+#Step 1
 arcpy.SetProgressorLabel("Uploading {} images".format(len(image_list)))
 arcpy.SetProgressor("step","Uploading images",0,total_num_steps,1)
 i = 1
@@ -77,7 +79,7 @@ endtime = time.time()
 arcpy.AddMessage("Uploading images took: {} seconds".format(round(endtime - starttime,2)))
 
 
-
+#Step 2
 starttime = time.time()
 arcpy.SetProgressorLabel("Checking EXIF data...")
 #Construct the GPS array structure - [[imageName1, gpsLatitude1, gpsLongtitude1, gpsAltitude1]...]
@@ -99,7 +101,7 @@ raster_type_params = {
 
 
 arcpy.SetProgressorLabel("Creating Collection...")
-image_collection_name = prj_name + "_col"
+image_collection_name = "col__" + prj_name
 image_collection_item = create_image_collection(image_collection=image_collection_name,
                                                 input_rasters=image_item_list,
                                                 raster_type_name="UAV/UAS",
@@ -121,7 +123,7 @@ arcpy.SetProgressorLabel("Starting adjustment and orthorectification...")
 from arcgis.raster.orthomapping import *
 from arcgis.raster.analytics import *
 
-
+#step 3
 starttime = time.time()
 compute_sensor_model(image_collection=image_collection_item, mode='Quick', location_accuracy='High')
 endtime = time.time()
@@ -135,23 +137,40 @@ arcpy.AddMessage("Computing Preliminary Sensor Model took: {} seconds".format(ro
 #arcpy.AddMessage("Computing Ground control points took: {} seconds".format(round(endtime - starttime,2)))
 
 
+#Step 4
+starttime = time.time()
 arcpy.SetProgressorLabel("Computing Color Correction")
 color_correction(image_collection=image_collection_item, color_correction_method="Dodging", dodging_surface_type="Color_Grid", target_image=None)
-arcpy.SetProgressorLabel("Computing Seamlines")
-compute_seamlines(image_collection=ici, seamlines_method="VORONOI")
+endtime = time.time()
+arcpy.AddMessage("Color Correction took: {} seconds".format(round(endtime - starttime,2)))
 
+#Step 5
+starttime = time.time()
+arcpy.SetProgressorLabel("Computing Seamlines")
+compute_seamlines(image_collection=image_collection_item, seamlines_method="VORONOI")
+endtime = time.time()
+arcpy.AddMessage("Computing Seamlines took: {} seconds".format(round(endtime - starttime,2)))
+
+#Step 6
+starttime = time.time()
 arcpy.SetProgressorLabel("Refining Sensor Model")
 compute_sensor_model(image_collection=image_collection_item, mode='Refine', location_accuracy='High')
+endtime = time.time()
+arcpy.AddMessage("Computing Refined Sensor Model took: {} seconds".format(round(endtime - starttime,2)))
 
+
+#Step 7
+starttime = time.time()
 arcpy.SetProgressorLabel("Building overview")
-arcgis.raster.analytics.build_overview(image_collection=ici)
+arcgis.raster.analytics.build_overview(image_collection=image_collection_item)
+endtime = time.time()
+arcpy.AddMessage("Building Overview took: {} seconds".format(round(endtime - starttime,2)))
 
+
+#Step 8
+starttime = time.time()
 arcpy.SetProgressorLabel("Generating orthomosaic")
-generate_orthomosaic(image_collection=ici, out_ortho="ortho2", regen_seamlines=False, recompute_color_correction=False)
-
-
-
-arcpy.SetProgressorPosition(total_num_steps * 2)
-#modelbuilder_ortho = image_collection_item.layers[0].export_image(size=[1200,450], f='image', save_folder='.', save_file= prj_name + '_ortho.jpg')
-arcpy.SetProgressorPosition(total_num_steps * 3)
-
+ortho_name = "ortho__" + prj_name
+generate_orthomosaic(image_collection=image_collection_item, out_ortho=ortho_name, regen_seamlines=False, recompute_color_correction=False)
+endtime = time.time()
+arcpy.AddMessage("Generating Orthomosaic took: {} seconds".format(round(endtime - starttime,2)))
