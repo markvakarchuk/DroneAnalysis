@@ -119,22 +119,39 @@ arcpy.SetProgressorPosition(round(total_num_steps * .75))
 
 arcpy.SetProgressorLabel("Starting adjustment and orthorectification...")
 from arcgis.raster.orthomapping import *
+from arcgis.raster.analytics import *
 
 
 starttime = time.time()
-compute_sensor_model(image_collection=image_collection_item, mode='Quick', location_accuracy='Low')
+compute_sensor_model(image_collection=image_collection_item, mode='Quick', location_accuracy='High')
 endtime = time.time()
 arcpy.AddMessage("Computing Preliminary Sensor Model took: {} seconds".format(round(endtime - starttime,2)))
 
-starttime = time.time()
-compute_control_points(image_collection=image_collection_item,
+#starttime = time.time()
+#compute_control_points(image_collection=image_collection_item,
                         reference_image="https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
                         image_location_accuracy='High')
-endtime = time.time()
-arcpy.AddMessage("Computing Control Points took: {} seconds".format(round(endtime - starttime,2)))
+#endtime = time.time()
+#arcpy.AddMessage("Computing Ground control points took: {} seconds".format(round(endtime - starttime,2)))
+
+
+arcpy.SetProgressorLabel("Computing Color Correction")
+color_correction(image_collection=image_collection_item, color_correction_method="Dodging", dodging_surface_type="Color_Grid", target_image=None)
+arcpy.SetProgressorLabel("Computing Seamlines")
+compute_seamlines(image_collection=ici, seamlines_method="VORONOI")
+
+arcpy.SetProgressorLabel("Refining Sensor Model")
+compute_sensor_model(image_collection=image_collection_item, mode='Refine', location_accuracy='High')
+
+arcpy.SetProgressorLabel("Building overview")
+arcgis.raster.analytics.build_overview(image_collection=ici)
+
+arcpy.SetProgressorLabel("Generating orthomosaic")
+generate_orthomosaic(image_collection=ici, out_ortho="ortho2", regen_seamlines=False, recompute_color_correction=False)
+
 
 
 arcpy.SetProgressorPosition(total_num_steps * 2)
-modelbuilder_ortho = image_collection_item.layers[0].export_image(size=[1200,450], f='image', save_folder='.', save_file= prj_name + '_ortho.jpg')
+#modelbuilder_ortho = image_collection_item.layers[0].export_image(size=[1200,450], f='image', save_folder='.', save_file= prj_name + '_ortho.jpg')
 arcpy.SetProgressorPosition(total_num_steps * 3)
 
