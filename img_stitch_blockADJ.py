@@ -129,8 +129,8 @@ arcpy.AddMessage("Computing Preliminary Sensor Model took: {} seconds".format(ro
 
 #starttime = time.time()
 #compute_control_points(image_collection=image_collection_item,
-                        reference_image="https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
-                        image_location_accuracy='High')
+#                        reference_image="https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+#                        image_location_accuracy='High')
 #endtime = time.time()
 #arcpy.AddMessage("Computing Ground control points took: {} seconds".format(round(endtime - starttime,2)))
 
